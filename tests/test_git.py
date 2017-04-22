@@ -38,3 +38,10 @@ def test_git_str_expanduser(run):
     run.assert_called_once_with(
         ['git', '--git-dir', '/home/git/foo/.git',
          '--work-tree', '/home/git/foo', 'foobar'])
+
+
+def test_git_init(tmpdir):
+    repo = tmpdir / 'foo'
+    git.git('', ['init', str(repo)])
+    result = git.git(str(repo), ['status'])
+    assert result.returncode == 0
