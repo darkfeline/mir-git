@@ -35,6 +35,7 @@ has_unstaged_changes()
 """
 
 import functools
+import os
 from pathlib import Path
 import subprocess
 
@@ -73,7 +74,9 @@ def _git_gitenv(env, args, **kwargs):
         **kwargs)
 
 
+@git.register(os.PathLike)
 @git.register(str)
+@git.register(bytes)
 def _git_str(worktree, args, **kwargs):
     env = GitEnv(gitdir=Path(worktree) / '.git',
                  worktree=worktree)
