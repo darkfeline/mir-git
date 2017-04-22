@@ -1,5 +1,5 @@
 mir.git README
-====================
+==============
 
 .. image:: https://circleci.com/gh/darkfeline/mir.git.svg?style=shield
    :target: https://circleci.com/gh/darkfeline/mir.git
@@ -14,4 +14,6 @@ mir.git README
    :target: http://mir-git.readthedocs.io/en/latest/
    :alt: Latest Documentation
 
-Template project for Python projects under Project Mir.
+Python interface to Git.
+
+See module docstring for public API.

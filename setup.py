@@ -16,16 +16,15 @@ from setuptools import setup
 
 setup(
     name='mir.git',
-    version='0.1.0',
-    description='Distribution template for the mir namespace',
+    version='1.0.0',
+    description='Python interface to Git',
     long_description='',
     keywords='',
     url='https://github.com/darkfeline/mir.git',
     author='Allen Li',
     author_email='darkfeline@felesatra.moe',
     classifiers=[
-        # https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3.6',
@@ -33,9 +32,4 @@ setup(
 
     packages=['mir.git'],
     install_requires=[],
-    entry_points={
-        'console_scripts': [
-            'protology = mir.protology.__main__:main',
-        ],
-    },
 )
