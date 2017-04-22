@@ -1,9 +1,9 @@
 mir.git Release Notes
-===========================
+=====================
 
 This project uses `semantic versioning <http://semver.org/>`_.
 
-0.1.0 (YYYY-MM-DD)
+1.0.0 (2017-04-21)
 ------------------
 
 Initial release.
