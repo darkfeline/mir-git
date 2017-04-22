@@ -15,12 +15,12 @@
 from setuptools import setup
 
 setup(
-    name='mir.protology',
+    name='mir.git',
     version='0.1.0',
     description='Distribution template for the mir namespace',
     long_description='',
     keywords='',
-    url='https://github.com/darkfeline/mir.protology',
+    url='https://github.com/darkfeline/mir.git',
     author='Allen Li',
     author_email='darkfeline@felesatra.moe',
     classifiers=[
@@ -31,7 +31,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
 
-    packages=['mir.protology'],
+    packages=['mir.git'],
     install_requires=[],
     entry_points={
         'console_scripts': [

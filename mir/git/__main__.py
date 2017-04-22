@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from mir.protology import main
+from mir.git import main
 
 main.main()

@@ -15,8 +15,8 @@
 import contextlib
 import io
 
-from mir.protology.main import main
-from mir.protology.main import quack
+from mir.git.main import main
+from mir.git.main import quack
 
 
 def test_quack():
