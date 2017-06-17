@@ -20,7 +20,7 @@ setup(
     description='Python interface to Git',
     long_description='',
     keywords='',
-    url='https://github.com/darkfeline/mir.git',
+    url='https://github.com/darkfeline/mir-git',
     author='Allen Li',
     author_email='darkfeline@felesatra.moe',
     classifiers=[
