@@ -6,6 +6,12 @@ This project uses `semantic versioning <http://semver.org/>`_.
 1.0.1 ()
 --------
 
+Changed
+^^^^^^^
+
+- Fixed various links.
+- `git()` now works with bytes and PathLike
+
 1.0.0 (2017-04-21)
 ------------------
 
