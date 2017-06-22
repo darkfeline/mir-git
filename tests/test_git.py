@@ -108,3 +108,23 @@ def test_git_save_branch_should_raise_when_restore_fails(gitdir):
         with git.save_branch(gitdir):
             subprocess.run(['git', 'checkout', 'slave'])
             subprocess.run(['git', 'branch', '-d', 'master'])
+
+
+def test_git_save_worktree(gitdir):
+    subprocess.run(['git', 'branch', 'slave'])
+    (gitdir / 'foo').unlink()
+    with git.save_worktree(gitdir):
+        subprocess.run(['git', 'checkout', 'slave'])
+    branch = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                            stdout=subprocess.PIPE).stdout.decode().rstrip()
+    assert branch == 'master'
+    assert not (gitdir / 'foo').exists()
+
+
+def test_git_save_worktree_should_be_quiet(gitdir):
+    subprocess.run(['git', 'branch', 'slave'])
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        with git.save_worktree(gitdir):
+            subprocess.run(['git', 'checkout', 'slave'])
+    assert f.getvalue() == ''

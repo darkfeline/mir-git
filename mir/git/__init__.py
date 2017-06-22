@@ -35,6 +35,7 @@ has_staged_changes()
 has_unpushed_changes()
 has_unstaged_changes()
 save_branch()
+save_worktree()
 """
 
 import functools
@@ -126,3 +127,19 @@ class save_branch:
     def __exit__(self, exc_type, exc_val, exc_tb):
         git(self._env, ['checkout', '--quiet', '--force', self.starting_branch],
             check=True)
+
+
+class save_worktree(save_branch):
+
+    """Context manager for saving and restoring the worktree.
+
+    This relies on the Git stash stack, so be careful with stash pop.
+    """
+
+    def __enter__(self):
+        git(self._env, ['stash', '--quiet'])
+        return super().__enter__()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        super().__exit__(exc_type, exc_val, exc_tb)
+        git(self._env, ['stash', 'pop', '--quiet'])
