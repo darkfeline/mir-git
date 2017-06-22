@@ -32,6 +32,11 @@ def gitdir(tmpdir):
     try:
         subprocess.run(['git', 'init', str(repo)])
         os.chdir(repo)
+        subprocess.run(['git', 'config', 'user.name', 'Your Name'])
+        subprocess.run(['git', 'config', 'user.email', 'you@example.com'])
+        (repo / 'foo').write_text('foo\n')
+        subprocess.run(['git', 'add', 'foo'])
+        subprocess.run(['git', 'commit', '-m', 'foo'])
         yield repo
     finally:
         os.chdir(cwd)

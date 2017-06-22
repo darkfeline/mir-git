@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import subprocess
 from unittest import mock
 
 import pytest
@@ -43,3 +44,35 @@ def test_git_str_expanduser(run):
 def test_git_status(gitdir):
     result = git.git(gitdir, ['status'])
     assert result.returncode == 0
+
+
+def test_git_has_unpushed_changes(gitdir):
+    subprocess.run(['git', 'branch', '-t', 'slave'])
+    subprocess.run(['git', 'checkout', 'slave'])
+    (gitdir / 'bar').touch()
+    subprocess.run(['git', 'add', 'bar'])
+    subprocess.run(['git', 'commit', '-m', 'bar'])
+    assert git.has_unpushed_changes(gitdir)
+
+
+def test_git_has_unpushed_changes_false(gitdir):
+    assert not git.has_unpushed_changes(gitdir)
+
+
+def test_git_has_unstaged_changes(gitdir):
+    (gitdir / 'foo').write_text('bar\n')
+    assert git.has_unstaged_changes(gitdir)
+
+
+def test_git_has_unstaged_changes_false(gitdir):
+    assert not git.has_unstaged_changes(gitdir)
+
+
+def test_git_has_staged_changes(gitdir):
+    (gitdir / 'foo').write_text('bar\n')
+    subprocess.run(['git', 'add', 'foo'])
+    assert git.has_staged_changes(gitdir)
+
+
+def test_git_has_staged_changes_false(gitdir):
+    assert not git.has_staged_changes(gitdir)
