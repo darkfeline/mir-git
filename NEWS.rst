@@ -11,6 +11,7 @@ Added
 ^^^^^
 
 - get_current_branch()
+- save_branch()
 
 1.0.1 (2017-06-17)
 ------------------

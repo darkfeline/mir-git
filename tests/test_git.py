@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
+import io
 import subprocess
 from unittest import mock
 
@@ -80,3 +82,29 @@ def test_git_has_staged_changes_false(gitdir):
 
 def test_git_get_current_branch(gitdir):
     assert git.get_current_branch(gitdir) == 'master'
+
+
+def test_git_save_branch(gitdir):
+    subprocess.run(['git', 'branch', 'slave'])
+    with git.save_branch(gitdir):
+        subprocess.run(['git', 'checkout', 'slave'])
+    branch = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                            stdout=subprocess.PIPE).stdout.decode().rstrip()
+    assert branch == 'master'
+
+
+def test_git_save_branch_should_be_quiet(gitdir):
+    subprocess.run(['git', 'branch', 'slave'])
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        with git.save_branch(gitdir):
+            subprocess.run(['git', 'checkout', 'slave'])
+    assert f.getvalue() == ''
+
+
+def test_git_save_branch_should_raise_when_restore_fails(gitdir):
+    subprocess.run(['git', 'branch', 'slave'])
+    with pytest.raises(subprocess.CalledProcessError):
+        with git.save_branch(gitdir):
+            subprocess.run(['git', 'checkout', 'slave'])
+            subprocess.run(['git', 'branch', '-d', 'master'])

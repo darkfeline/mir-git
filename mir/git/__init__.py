@@ -34,6 +34,7 @@ get_current_branch()
 has_staged_changes()
 has_unpushed_changes()
 has_unstaged_changes()
+save_branch()
 """
 
 import functools
@@ -108,3 +109,18 @@ def get_current_branch(env) -> str:
     """Return the current Git branch."""
     return git(env, ['rev-parse', '--abbrev-ref', 'HEAD'],
                stdout=subprocess.PIPE).stdout.decode().rstrip()
+
+
+class save_branch:
+
+    def __init__(self, env):
+        self._env = env
+        self.starting_branch = None
+
+    def __enter__(self):
+        self.starting_branch = get_current_branch(self._env)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        git(self._env, ['checkout', '--quiet', '--force', self.starting_branch],
+            check=True)
