@@ -83,20 +83,20 @@ def _git_str(worktree, args, **kwargs):
     return git(env, args, **kwargs)
 
 
-def has_unpushed_changes(env):
+def has_unpushed_changes(env) -> bool:
     """Return True if the Git repo has unpushed changes."""
     result = git(env, ['rev-list', '-n', '1', 'HEAD@{u}..HEAD'],
                  stdout=subprocess.PIPE)
     return bool(result.stdout)
 
 
-def has_staged_changes(env):
+def has_staged_changes(env) -> bool:
     """Return True if the Git repo has staged changes."""
     result = git(env, ['diff-index', '--quiet', '--cached', 'HEAD'])
     return result.returncode != 0
 
 
-def has_unstaged_changes(env):
+def has_unstaged_changes(env) -> bool:
     """Return True if the Git repo has unstaged changes."""
     result = git(env, ['diff-index', '--quiet', 'HEAD'])
     return result.returncode != 0
