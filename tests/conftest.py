@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import pathlib
+import subprocess
 
 import pytest
 
@@ -21,3 +23,15 @@ import pytest
 def tmpdir(tmpdir_factory):
     tmpdir = tmpdir_factory.mktemp('tmpdir')
     return pathlib.Path(str(tmpdir))
+
+
+@pytest.fixture
+def gitdir(tmpdir):
+    repo = tmpdir / 'repo'
+    cwd = pathlib.Path.cwd()
+    try:
+        subprocess.run(['git', 'init', str(repo)])
+        os.chdir(repo)
+        yield repo
+    finally:
+        os.chdir(cwd)

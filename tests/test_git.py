@@ -40,8 +40,6 @@ def test_git_str_expanduser(run):
          '--work-tree', '/home/git/foo', 'foobar'])
 
 
-def test_git_init(tmpdir):
-    repo = tmpdir / 'foo'
-    git.git('', ['init', str(repo)])
-    result = git.git(str(repo), ['status'])
+def test_git_status(gitdir):
+    result = git.git(gitdir, ['status'])
     assert result.returncode == 0
