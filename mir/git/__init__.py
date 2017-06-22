@@ -39,7 +39,7 @@ import os
 from pathlib import Path
 import subprocess
 
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 
 
 class GitEnv:

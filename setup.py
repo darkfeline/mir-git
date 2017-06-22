@@ -16,7 +16,7 @@ from setuptools import setup
 
 setup(
     name='mir.git',
-    version='1.0.1',
+    version='1.1.0',
     description='Python interface to Git',
     long_description='',
     keywords='',
