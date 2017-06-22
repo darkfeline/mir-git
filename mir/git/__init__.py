@@ -29,8 +29,10 @@ Members:
 
 git() -- All-purpose generic function interface to Git
 GitEnv -- Git invocation environment
-has_unpushed_changes()
+
+get_current_branch()
 has_staged_changes()
+has_unpushed_changes()
 has_unstaged_changes()
 """
 
