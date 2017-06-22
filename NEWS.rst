@@ -7,6 +7,11 @@ This project uses `semantic versioning <http://semver.org/>`_.
 1.1.0 ()
 --------
 
+Added
+^^^^^
+
+- get_current_branch()
+
 1.0.1 (2017-06-17)
 ------------------
 

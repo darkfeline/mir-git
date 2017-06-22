@@ -76,3 +76,7 @@ def test_git_has_staged_changes(gitdir):
 
 def test_git_has_staged_changes_false(gitdir):
     assert not git.has_staged_changes(gitdir)
+
+
+def test_git_get_current_branch(gitdir):
+    assert git.get_current_branch(gitdir) == 'master'

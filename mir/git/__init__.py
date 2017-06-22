@@ -100,3 +100,9 @@ def has_unstaged_changes(env):
     """Return True if the Git repo has unstaged changes."""
     result = git(env, ['diff-index', '--quiet', 'HEAD'])
     return result.returncode != 0
+
+
+def get_current_branch(env) -> str:
+    """Return the current Git branch."""
+    return git(env, ['rev-parse', '--abbrev-ref', 'HEAD'],
+               stdout=subprocess.PIPE).stdout.decode().rstrip()
