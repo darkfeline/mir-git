@@ -113,6 +113,8 @@ def get_current_branch(env) -> str:
 
 class save_branch:
 
+    """Context manager for saving and restoring the current Git branch."""
+
     def __init__(self, env):
         self._env = env
         self.starting_branch = None
