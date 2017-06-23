@@ -6,6 +6,12 @@ This project uses `semantic versioning <http://semver.org/>`_.
 1.1.1 ()
 --------
 
+Fixed
+^^^^^
+
+- Fixed `save_wortree()` printing to stdout/stderr.
+- Use `stash create` to make `save_wortree()` more robust.
+
 1.1.0 (2017-06-22)
 ------------------
 

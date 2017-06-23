@@ -39,11 +39,14 @@ save_worktree()
 """
 
 import functools
+import logging
 import os
 from pathlib import Path
 import subprocess
 
 __version__ = '1.1.1'
+
+logger = logging.getLogger(__name__)
 
 
 class GitEnv:
@@ -131,15 +134,21 @@ class save_branch:
 
 class save_worktree(save_branch):
 
-    """Context manager for saving and restoring the worktree.
+    """Context manager for saving and restoring the worktree."""
 
-    This relies on the Git stash stack, so be careful with stash pop.
-    """
+    def __init__(self, env):
+        super().__init__(env)
+        self._stash = ''
 
     def __enter__(self):
-        git(self._env, ['stash', '--quiet'])
+        proc = git(self._env, ['stash', 'create'],
+                   stdout=subprocess.PIPE)
+        self._stash = proc.stdout.decode().rstrip()
+        logger.debug(f'Created stash {self._stash!r}')
+        git(self._env, ['reset', '--hard', '--quiet', 'HEAD'])
         return super().__enter__()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         super().__exit__(exc_type, exc_val, exc_tb)
-        git(self._env, ['stash', 'pop', '--quiet'])
+        if self._stash:
+            git(self._env, ['stash', 'apply', '--quiet', self._stash])

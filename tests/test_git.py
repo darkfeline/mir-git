@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import contextlib
-import io
 import subprocess
 from unittest import mock
 
@@ -93,14 +91,13 @@ def test_git_save_branch(gitdir):
     assert branch == 'master'
 
 
-def test_git_save_branch_should_be_quiet(gitdir):
-    subprocess.run(['git', 'branch', 'slave'])
-    f = io.StringIO()
-    with contextlib.redirect_stdout(f), \
-         contextlib.redirect_stderr(f), \
-         git.save_branch(gitdir):
-        subprocess.run(['git', 'checkout', 'slave'])
-    assert f.getvalue() == ''
+def test_git_save_branch_should_be_quiet(capfd, gitdir):
+    subprocess.run(['git', 'branch', '--quiet', 'slave'])
+    with git.save_branch(gitdir):
+        subprocess.run(['git', 'checkout', '--quiet', 'slave'])
+    out, err = capfd.readouterr()
+    assert not out
+    assert not err
 
 
 def test_git_save_branch_should_raise_when_restore_fails(gitdir):
@@ -115,18 +112,33 @@ def test_git_save_worktree(gitdir):
     subprocess.run(['git', 'branch', 'slave'])
     (gitdir / 'foo').unlink()
     with git.save_worktree(gitdir):
+        assert (gitdir / 'foo').exists()
+    assert not (gitdir / 'foo').exists()
+
+
+def test_git_save_worktree_saves_branch(gitdir):
+    subprocess.run(['git', 'branch', 'slave'])
+    with git.save_worktree(gitdir):
         subprocess.run(['git', 'checkout', 'slave'])
     branch = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
                             stdout=subprocess.PIPE).stdout.decode().rstrip()
     assert branch == 'master'
-    assert not (gitdir / 'foo').exists()
 
 
-def test_git_save_worktree_should_be_quiet(gitdir):
-    subprocess.run(['git', 'branch', 'slave'])
-    f = io.StringIO()
-    with contextlib.redirect_stdout(f), \
-         contextlib.redirect_stderr(f), \
-         git.save_worktree(gitdir):
-        subprocess.run(['git', 'checkout', 'slave'])
-    assert f.getvalue() == ''
+def test_git_save_worktree_should_be_quiet_with_change(capfd, gitdir):
+    subprocess.run(['git', 'branch', '--quiet', 'slave'])
+    (gitdir / 'foo').unlink()
+    with git.save_worktree(gitdir):
+        pass
+    out, err = capfd.readouterr()
+    assert not out
+    assert not err
+
+
+def test_git_save_worktree_should_be_quiet_without_change(capfd, gitdir):
+    subprocess.run(['git', 'branch', '--quiet', 'slave'])
+    with git.save_worktree(gitdir):
+        pass
+    out, err = capfd.readouterr()
+    assert not out
+    assert not err
