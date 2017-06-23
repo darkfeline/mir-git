@@ -18,9 +18,9 @@ Fixed
 Added
 ^^^^^
 
-- get_current_branch()
-- save_branch()
-- save_worktree()
+- `get_current_branch()`
+- `save_branch()`
+- `save_worktree()`
 
 1.0.1 (2017-06-17)
 ------------------
@@ -29,7 +29,7 @@ Changed
 ^^^^^^^
 
 - Fixed various links.
-- `git()` now works with bytes and PathLike
+- `git()` now works with bytes and PathLike.
 
 1.0.0 (2017-04-21)
 ------------------
