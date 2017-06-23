@@ -96,9 +96,10 @@ def test_git_save_branch(gitdir):
 def test_git_save_branch_should_be_quiet(gitdir):
     subprocess.run(['git', 'branch', 'slave'])
     f = io.StringIO()
-    with contextlib.redirect_stdout(f):
-        with git.save_branch(gitdir):
-            subprocess.run(['git', 'checkout', 'slave'])
+    with contextlib.redirect_stdout(f), \
+         contextlib.redirect_stderr(f), \
+         git.save_branch(gitdir):
+        subprocess.run(['git', 'checkout', 'slave'])
     assert f.getvalue() == ''
 
 
@@ -124,7 +125,8 @@ def test_git_save_worktree(gitdir):
 def test_git_save_worktree_should_be_quiet(gitdir):
     subprocess.run(['git', 'branch', 'slave'])
     f = io.StringIO()
-    with contextlib.redirect_stdout(f):
-        with git.save_worktree(gitdir):
-            subprocess.run(['git', 'checkout', 'slave'])
+    with contextlib.redirect_stdout(f), \
+         contextlib.redirect_stderr(f), \
+         git.save_worktree(gitdir):
+        subprocess.run(['git', 'checkout', 'slave'])
     assert f.getvalue() == ''
