@@ -31,6 +31,7 @@ git() -- All-purpose generic function interface to Git
 GitEnv -- Git invocation environment
 
 get_current_branch()
+get_branches()
 has_staged_changes()
 has_unpushed_changes()
 has_unstaged_changes()
@@ -44,7 +45,7 @@ import os
 from pathlib import Path
 import subprocess
 
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +113,15 @@ def get_current_branch(env) -> str:
     """Return the current Git branch."""
     return git(env, ['rev-parse', '--abbrev-ref', 'HEAD'],
                stdout=subprocess.PIPE).stdout.decode().rstrip()
+
+
+def get_branches(env) -> list:
+    """Return a list of a Git repository's branches."""
+    proc = git(env, ['for-each-ref', '--format=%(refname)', 'refs/heads/'],
+               check=True, stdout=subprocess.PIPE)
+    output = proc.stdout.decode().splitlines()
+    start = len('refs/heads/')
+    return [line.rstrip()[start:] for line in output]
 
 
 class save_branch:

@@ -3,6 +3,14 @@ mir.git Release Notes
 
 This project uses `semantic versioning <http://semver.org/>`_.
 
+1.2.0 ()
+--------
+
+Added
+^^^^^
+
+- Added `get_branches()`.
+
 1.1.1 (2017-06-22)
 ------------------
 

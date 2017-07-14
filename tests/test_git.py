@@ -100,6 +100,10 @@ def test_git_get_current_branch(gitdir):
     assert git.get_current_branch(gitdir) == 'master'
 
 
+def test_git_get_branches(gitdir):
+    assert git.get_branches(gitdir) == ['master']
+
+
 def test_git_save_branch(gitdir):
     subprocess.run(['git', 'branch', 'slave'])
     with git.save_branch(gitdir):
