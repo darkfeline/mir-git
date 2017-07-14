@@ -30,7 +30,8 @@ def test_git_default():
 def test_git_str_method(run):
     git.git('foo', ['foobar'])
     run.assert_called_once_with(
-        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'])
+        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'],
+        encoding=mock.ANY)
 
 
 @mock.patch('subprocess.run')
@@ -40,14 +41,16 @@ def test_git_gitenv_method(run):
         worktree='foo')
     git.git(gitdir, ['foobar'])
     run.assert_called_once_with(
-        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'])
+        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'],
+        encoding=mock.ANY)
 
 
 @mock.patch('subprocess.run')
 def test_git_path_method(run):
     git.git(PurePath('foo'), ['foobar'])
     run.assert_called_once_with(
-        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'])
+        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'],
+        encoding=mock.ANY)
 
 
 @mock.patch.dict('os.environ', HOME='/home/git')
@@ -55,8 +58,8 @@ def test_git_path_method(run):
 def test_git_str_calls_expanduser(run):
     git.git('~/foo', ['foobar'])
     run.assert_called_once_with(
-        ['git', '--git-dir', '/home/git/foo/.git',
-         '--work-tree', '/home/git/foo', 'foobar'])
+        ['git', '--git-dir', '/home/git/foo/.git', '--work-tree', '/home/git/foo', 'foobar'],
+        encoding=mock.ANY)
 
 
 def test_git_status(gitdir):

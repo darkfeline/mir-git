@@ -10,6 +10,7 @@ Added
 ^^^^^
 
 - Added `get_branches()`.
+- Added `default_encoding`.
 
 1.1.1 (2017-06-22)
 ------------------
