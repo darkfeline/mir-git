@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import PurePath
 import subprocess
 from unittest import mock
 
@@ -26,15 +27,32 @@ def test_git_default():
 
 
 @mock.patch('subprocess.run')
-def test_git_str(run):
+def test_git_str_method(run):
     git.git('foo', ['foobar'])
+    run.assert_called_once_with(
+        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'])
+
+
+@mock.patch('subprocess.run')
+def test_git_gitenv_method(run):
+    gitdir = git.GitEnv(
+        gitdir='foo/.git',
+        worktree='foo')
+    git.git(gitdir, ['foobar'])
+    run.assert_called_once_with(
+        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'])
+
+
+@mock.patch('subprocess.run')
+def test_git_path_method(run):
+    git.git(PurePath('foo'), ['foobar'])
     run.assert_called_once_with(
         ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'])
 
 
 @mock.patch.dict('os.environ', HOME='/home/git')
 @mock.patch('subprocess.run')
-def test_git_str_expanduser(run):
+def test_git_str_calls_expanduser(run):
     git.git('~/foo', ['foobar'])
     run.assert_called_once_with(
         ['git', '--git-dir', '/home/git/foo/.git',
