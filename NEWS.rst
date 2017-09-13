@@ -9,7 +9,7 @@ This project uses `semantic versioning <http://semver.org/>`_.
 Fixed
 ^^^^^
 
-- Make `save_worktree` raise an exception if any commands fail.
+- Make `save_worktree()` raise an exception if any commands fail.
 
 1.2.0 (2017-07-13)
 ------------------
