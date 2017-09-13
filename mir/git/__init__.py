@@ -46,7 +46,7 @@ import os
 from pathlib import Path
 import subprocess
 
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 
 logger = logging.getLogger(__name__)
 default_encoding = 'utf-8'
@@ -154,13 +154,14 @@ class save_worktree(save_branch):
 
     def __enter__(self):
         proc = git(self._env, ['stash', 'create'],
+                   check=True,
                    stdout=subprocess.PIPE)
         self._stash = proc.stdout.rstrip()
         logger.debug(f'Created stash {self._stash!r}')
-        git(self._env, ['reset', '--hard', '--quiet', 'HEAD'])
+        git(self._env, ['reset', '--hard', '--quiet', 'HEAD'], check=True)
         return super().__enter__()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         super().__exit__(exc_type, exc_val, exc_tb)
         if self._stash:
-            git(self._env, ['stash', 'apply', '--quiet', self._stash])
+            git(self._env, ['stash', 'apply', '--quiet', self._stash], check=True)

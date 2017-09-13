@@ -3,6 +3,14 @@ mir.git Release Notes
 
 This project uses `semantic versioning <http://semver.org/>`_.
 
+1.2.1 (2017-09-12)
+------------------
+
+Fixed
+^^^^^
+
+- Make `save_worktree` raise an exception if any commands fail.
+
 1.2.0 (2017-07-13)
 ------------------
 
