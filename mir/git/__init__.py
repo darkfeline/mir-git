@@ -153,7 +153,8 @@ class save_worktree(save_branch):
         self._stash = ''
 
     def __enter__(self):
-        proc = git(self._env, ['stash', 'create'],
+        # BUG: https://public-inbox.org/git/CAJr1M6eS0jY22=0nvV41uDybcHUdjBv8CgRhHmBNFM=Z0J9YCA@mail.gmail.com/
+        proc = git(self._env, ['-C', self._env.worktree, 'stash', 'create'],
                    check=True,
                    stdout=subprocess.PIPE)
         self._stash = proc.stdout.rstrip()
@@ -164,4 +165,5 @@ class save_worktree(save_branch):
     def __exit__(self, exc_type, exc_val, exc_tb):
         super().__exit__(exc_type, exc_val, exc_tb)
         if self._stash:
-            git(self._env, ['stash', 'apply', '--quiet', self._stash], check=True)
+            git(self._env, ['-C', self._env.worktree,
+                            'stash', 'apply', '--quiet', self._stash], check=True)
