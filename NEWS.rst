@@ -3,8 +3,24 @@ mir.git Release Notes
 
 This project uses `semantic versioning <http://semver.org/>`_.
 
-1.2.2 (2017-12-20)
+2.0.0 (2017-12-20)
 ------------------
+
+Added
+^^^^^
+
+- `save_worktree_and_branch()` context manager.
+- `process_env()` function.
+- `gitdir()` generic function.
+- `worktree()` generic function.
+- `GitEnvInterface` for dynamic checking of interface.
+
+Changed
+^^^^^^^
+
+- `GitEnv` is now a named tuple.
+- `git()` is no longer a generic function.
+- `save_worktree()` no longer saves branch.
 
 Fixed
 ^^^^^

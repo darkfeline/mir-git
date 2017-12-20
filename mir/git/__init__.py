@@ -40,87 +40,124 @@ save_branch()
 save_worktree()
 """
 
+import abc
+import contextlib
 import functools
 import logging
 import os
-from pathlib import Path
 import subprocess
+from typing import NamedTuple
 
-__version__ = '1.2.2'
+__version__ = '2.0.0'
 
 logger = logging.getLogger(__name__)
 default_encoding = 'utf-8'
 
 
-class GitEnv:
+class GitEnvInterface(abc.ABC):
 
-    """Environment for Git invocations."""
+    """Abstract base class for Git environment implementations."""
 
-    def __init__(self, gitdir: 'PathLike', worktree: 'PathLike'):
-        self.gitdir = Path(gitdir).expanduser()
-        self.worktree = Path(worktree).expanduser()
+    @classmethod
+    def __subclasshook__(cls, C):
+        return (cls._has_implementation(gitdir, C)
+                and cls._has_implementation(worktree, C))
+
+    @staticmethod
+    def _has_implementation(f, C):
+        default = f.dispatch(object)
+        return f.dispatch(C) is not default
+
+
+class GitEnv(NamedTuple):
+    gitdir: str
+    worktree: str
 
 
 @functools.singledispatch
-def git(env, args, **kwargs):
-    """Run a Git command.
-
-    env is a Git environment, or some representation of a Git
-    environment.  args and kwargs are passed to subprocess.run().
-
-    Additional methods should be implemented by creating a suitable
-    GitEnv instance and calling git() again with it.
-
-    Returns a CompletedProcess.
-    """
+def gitdir(gitenv) -> str:
+    """Get GIT_DIR."""
     raise NotImplementedError
 
 
-@git.register(GitEnv)
-def _git_gitenv(env, args, **kwargs):
+@functools.singledispatch
+def worktree(gitenv) -> str:
+    """Get GIT_WORK_TREE."""
+    raise NotImplementedError
+
+
+@gitdir.register(GitEnv)
+def _gitdir_GitEnv(gitenv):
+    return gitenv.gitdir
+
+
+@worktree.register(GitEnv)
+def _worktree_GitEnv(gitenv):
+    return gitenv.worktree
+
+
+@gitdir.register(os.PathLike)
+@gitdir.register(str)
+def _gitdir_str(worktree):
+    return os.path.join(os.fspath(worktree), '.git')
+
+
+@worktree.register(os.PathLike)
+@worktree.register(str)
+def _worktree_str(worktree):
+    return os.fspath(worktree)
+
+
+def git(gitenv, args, **kwargs):
+    """Run a Git command.
+
+    gitenv is a GitEnv, or some representation of a Git environment that
+    has methods for gitdir() and worktree().  args and kwargs are passed
+    to subprocess.run().
+
+    Returns a CompletedProcess.
+    """
     kwargs.setdefault('encoding', default_encoding)
-    return subprocess.run(
-        ['git', '--git-dir', str(env.gitdir),
-         '--work-tree', str(env.worktree), *args],
-        **kwargs)
+    kwargs['env'] = process_env(gitenv, kwargs.get('env', os.environ))
+    return subprocess.run(['git', *args], **kwargs)
 
 
-@git.register(os.PathLike)
-@git.register(str)
-def _git_str(worktree, args, **kwargs):
-    env = GitEnv(gitdir=Path(worktree) / '.git',
-                 worktree=worktree)
-    return git(env, args, **kwargs)
+def process_env(gitenv: GitEnv, env: dict):
+    """Get process environment."""
+    env = env.copy()
+    env['GIT_DIR'] = gitdir(gitenv)
+    env['GIT_WORK_TREE'] = worktree(gitenv)
+    return env
 
 
-def has_unpushed_changes(env) -> bool:
+def has_unpushed_changes(gitenv) -> bool:
     """Return True if the Git repo has unpushed changes."""
-    result = git(env, ['rev-list', '-n', '1', 'HEAD@{u}..HEAD'],
+    result = git(gitenv, ['rev-list', '-n', '1', 'HEAD@{u}..HEAD'],
                  stdout=subprocess.PIPE)
     return bool(result.stdout)
 
 
-def has_staged_changes(env) -> bool:
+def has_staged_changes(gitenv) -> bool:
     """Return True if the Git repo has staged changes."""
-    result = git(env, ['diff-index', '--quiet', '--cached', 'HEAD'])
+    result = git(gitenv, ['diff-index', '--quiet', '--cached', 'HEAD'])
     return result.returncode != 0
 
 
-def has_unstaged_changes(env) -> bool:
+def has_unstaged_changes(gitenv) -> bool:
     """Return True if the Git repo has unstaged changes."""
-    result = git(env, ['diff-index', '--quiet', 'HEAD'])
+    result = git(gitenv, ['diff-index', '--quiet', 'HEAD'])
     return result.returncode != 0
 
 
-def get_current_branch(env) -> str:
+def get_current_branch(gitenv) -> str:
     """Return the current Git branch."""
-    return git(env, ['rev-parse', '--abbrev-ref', 'HEAD'],
+    return git(gitenv, ['rev-parse', '--abbrev-ref', 'HEAD'],
                stdout=subprocess.PIPE).stdout.rstrip()
 
 
-def get_branches(env) -> list:
+def get_branches(gitenv) -> list:
     """Return a list of a Git repository's branches."""
-    proc = git(env, ['for-each-ref', '--format=%(refname)', 'refs/heads/'],
+    proc = git(gitenv, ['for-each-ref', '--format=%(refname)', 'refs/heads/'],
                check=True, stdout=subprocess.PIPE)
     output = proc.stdout.splitlines()
     start = len('refs/heads/')
@@ -131,39 +168,47 @@ class save_branch:
 
     """Context manager for saving and restoring the current Git branch."""
 
-    def __init__(self, env):
-        self._env = env
+    def __init__(self, gitenv):
+        self._gitenv = gitenv
         self.starting_branch = None
 
     def __enter__(self):
-        self.starting_branch = get_current_branch(self._env)
+        self.starting_branch = get_current_branch(self._gitenv)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        git(self._env, ['checkout', '--quiet', '--force', self.starting_branch],
+        git(self._gitenv, ['checkout', '--quiet', '--force', self.starting_branch],
             check=True)
 
 
-class save_worktree(save_branch):
+class save_worktree:
 
     """Context manager for saving and restoring the worktree."""
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self, gitenv):
+        self._gitenv = gitenv
         self._stash = ''
 
     def __enter__(self):
         # BUG: https://public-inbox.org/git/CAJr1M6eS0jY22=0nvV41uDybcHUdjBv8CgRhHmBNFM=Z0J9YCA@mail.gmail.com/
-        proc = git(self._env, ['-C', self._env.worktree, 'stash', 'create'],
+        proc = git(self._gitenv, ['-C', worktree(self._gitenv), 'stash', 'create'],
                    check=True,
                    stdout=subprocess.PIPE)
         self._stash = proc.stdout.rstrip()
         logger.debug(f'Created stash {self._stash!r}')
-        git(self._env, ['reset', '--hard', '--quiet', 'HEAD'], check=True)
-        return super().__enter__()
+        git(self._gitenv, ['reset', '--hard', '--quiet', 'HEAD'], check=True)
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        super().__exit__(exc_type, exc_val, exc_tb)
+        # If there were no changes to stash, this is the empty string.
         if self._stash:
-            git(self._env, ['-C', self._env.worktree,
-                            'stash', 'apply', '--quiet', self._stash], check=True)
+            git(self._gitenv, ['-C', worktree(self._gitenv),
+                               'stash', 'apply', '--quiet', self._stash], check=True)
+
+
+@contextlib.contextmanager
+def save_worktree_and_branch(gitenv):
+    """Context manager for saving and restoring the worktree and branch."""
+    with save_worktree(gitenv):
+        with save_branch(gitenv) as branch_context:
+            yield branch_context

@@ -12,62 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import PurePath
 import subprocess
-from unittest import mock
 
 import pytest
 
 from mir import git
 
 
-def test_git_default():
-    with pytest.raises(NotImplementedError):
-        git.git(object(), ['foobar'])
+def test_GitEnvInterface_implemented_by_GitEnv():
+    assert issubclass(git.GitEnv, git.GitEnvInterface)
 
 
-@mock.patch('subprocess.run')
-def test_git_str_method(run):
-    git.git('foo', ['foobar'])
-    run.assert_called_once_with(
-        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'],
-        encoding=mock.ANY)
+def test_GitEnvInterface_implemented_by_str():
+    assert issubclass(str, git.GitEnvInterface)
 
 
-@mock.patch('subprocess.run')
-def test_git_gitenv_method(run):
-    gitdir = git.GitEnv(
-        gitdir='foo/.git',
-        worktree='foo')
-    git.git(gitdir, ['foobar'])
-    run.assert_called_once_with(
-        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'],
-        encoding=mock.ANY)
+def test_GitEnvInterface_not_implemented_by_set():
+    assert not issubclass(set, git.GitEnvInterface)
 
 
-@mock.patch('subprocess.run')
-def test_git_path_method(run):
-    git.git(PurePath('foo'), ['foobar'])
-    run.assert_called_once_with(
-        ['git', '--git-dir', 'foo/.git', '--work-tree', 'foo', 'foobar'],
-        encoding=mock.ANY)
+def test_GitEnv():
+    e = git.GitEnv(gitdir='foo', worktree='bar')
+    assert git.gitdir(e) == 'foo'
+    assert git.worktree(e) == 'bar'
 
 
-@mock.patch.dict('os.environ', HOME='/home/git')
-@mock.patch('subprocess.run')
-def test_git_str_calls_expanduser(run):
-    git.git('~/foo', ['foobar'])
-    run.assert_called_once_with(
-        ['git', '--git-dir', '/home/git/foo/.git', '--work-tree', '/home/git/foo', 'foobar'],
-        encoding=mock.ANY)
-
-
-def test_git_status(gitdir):
+def test_git(gitdir):
     result = git.git(gitdir, ['status'])
     assert result.returncode == 0
 
 
-def test_git_has_unpushed_changes(gitdir):
+def test_git_has_unpushed_changes_true(gitdir):
     subprocess.run(['git', 'branch', '-t', 'slave'])
     subprocess.run(['git', 'checkout', 'slave'])
     (gitdir / 'bar').touch()
@@ -80,7 +55,7 @@ def test_git_has_unpushed_changes_false(gitdir):
     assert not git.has_unpushed_changes(gitdir)
 
 
-def test_git_has_unstaged_changes(gitdir):
+def test_git_has_unstaged_changes_true(gitdir):
     (gitdir / 'foo').write_text('bar\n')
     assert git.has_unstaged_changes(gitdir)
 
@@ -89,7 +64,7 @@ def test_git_has_unstaged_changes_false(gitdir):
     assert not git.has_unstaged_changes(gitdir)
 
 
-def test_git_has_staged_changes(gitdir):
+def test_git_has_staged_changes_true(gitdir):
     (gitdir / 'foo').write_text('bar\n')
     subprocess.run(['git', 'add', 'foo'])
     assert git.has_staged_changes(gitdir)
@@ -141,15 +116,6 @@ def test_git_save_worktree(gitdir):
     assert not (gitdir / 'foo').exists()
 
 
-def test_git_save_worktree_saves_branch(gitdir):
-    subprocess.run(['git', 'branch', 'slave'])
-    with git.save_worktree(gitdir):
-        subprocess.run(['git', 'checkout', 'slave'])
-    branch = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-                            stdout=subprocess.PIPE).stdout.decode().rstrip()
-    assert branch == 'master'
-
-
 def test_git_save_worktree_should_be_quiet_with_change(capfd, gitdir):
     subprocess.run(['git', 'branch', '--quiet', 'slave'])
     (gitdir / 'foo').unlink()
@@ -167,3 +133,12 @@ def test_git_save_worktree_should_be_quiet_without_change(capfd, gitdir):
     out, err = capfd.readouterr()
     assert not out
     assert not err
+
+
+def test_git_save_worktree_and_branch_saves_branch(gitdir):
+    subprocess.run(['git', 'branch', 'slave'])
+    with git.save_worktree_and_branch(gitdir):
+        subprocess.run(['git', 'checkout', 'slave'])
+    branch = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                            stdout=subprocess.PIPE).stdout.decode().rstrip()
+    assert branch == 'master'

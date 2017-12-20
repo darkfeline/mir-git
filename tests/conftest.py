@@ -28,10 +28,10 @@ def tmpdir(tmpdir_factory):
 @pytest.fixture
 def gitdir(tmpdir):
     repo = tmpdir / 'repo'
+    subprocess.run(['git', 'init', str(repo)])
     cwd = pathlib.Path.cwd()
+    os.chdir(repo)
     try:
-        subprocess.run(['git', 'init', str(repo)])
-        os.chdir(repo)
         subprocess.run(['git', 'config', 'user.name', 'Your Name'])
         subprocess.run(['git', 'config', 'user.email', 'you@example.com'])
         (repo / 'foo').write_text('foo\n')
