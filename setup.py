@@ -12,11 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 from setuptools import setup
+
+
+def find_version(path):
+    with open(path) as f:
+        text = f.read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              text, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
 
 setup(
     name='mir.git',
-    version='1.2.1',
+    version=find_version('mir/git/__init__.py'),
     description='Python interface to Git',
     long_description='',
     keywords='',
@@ -31,5 +43,6 @@ setup(
     ],
 
     packages=['mir.git'],
+    python_requires='~=3.6',
     install_requires=[],
 )
