@@ -3,6 +3,14 @@ mir.git Release Notes
 
 This project uses `semantic versioning <http://semver.org/>`_.
 
+1.2.2 (2017-12-20)
+------------------
+
+Fixed
+^^^^^
+
+- Work around bug in `git-stash`.
+
 1.2.1 (2017-09-12)
 ------------------
 

@@ -46,7 +46,7 @@ import os
 from pathlib import Path
 import subprocess
 
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 
 logger = logging.getLogger(__name__)
 default_encoding = 'utf-8'
