@@ -45,10 +45,12 @@ import contextlib
 import functools
 import logging
 import os
+import random
 import subprocess
+import time
 from typing import NamedTuple
 
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 
 logger = logging.getLogger(__name__)
 default_encoding = 'utf-8'
@@ -164,6 +166,19 @@ def get_branches(gitenv) -> list:
     return [line.rstrip()[start:] for line in output]
 
 
+def _cmd_retry(func):
+    @functools.wraps(func)
+    def retrier(*args, **kwargs):
+        wait = 1
+        for _ in range(5):
+            try:
+                return func(*args, **kwargs)
+            except subprocess.CalledProcessError:
+                time.sleep(random.random() * wait)
+                wait *= 2
+    return retrier
+
+
 class save_branch:
 
     """Context manager for saving and restoring the current Git branch."""
@@ -176,6 +191,7 @@ class save_branch:
         self.starting_branch = get_current_branch(self._gitenv)
         return self
 
+    @_cmd_retry
     def __exit__(self, exc_type, exc_val, exc_tb):
         git(self._gitenv, ['checkout', '--quiet', '--force', self.starting_branch],
             check=True)
@@ -199,6 +215,7 @@ class save_worktree:
         git(self._gitenv, ['reset', '--hard', '--quiet', 'HEAD'], check=True)
         return self
 
+    @_cmd_retry
     def __exit__(self, exc_type, exc_val, exc_tb):
         # If there were no changes to stash, this is the empty string.
         if self._stash:

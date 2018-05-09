@@ -3,6 +3,15 @@ mir.git Release Notes
 
 This project uses `semantic versioning <http://semver.org/>`_.
 
+2.1.0 (2018-05-09)
+------------------
+
+Added
+^^^^^
+
+- Context managers now use retry `__exit__` with exponential backoff
+  instead of dying.
+
 2.0.0 (2017-12-20)
 ------------------
 
