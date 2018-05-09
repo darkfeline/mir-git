@@ -3,6 +3,20 @@ mir.git Release Notes
 
 This project uses `semantic versioning <http://semver.org/>`_.
 
+2.1.1 (2018-05-09)
+------------------
+
+Changed
+^^^^^^^
+
+- Decreased time taken by retry attempts.
+
+Fixed
+^^^^^
+
+- Raise the exception if retrying `__exit__` on the context managers
+  does not work.
+
 2.1.0 (2018-05-09)
 ------------------
 

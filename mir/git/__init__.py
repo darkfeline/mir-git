@@ -50,7 +50,7 @@ import subprocess
 import time
 from typing import NamedTuple
 
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 
 logger = logging.getLogger(__name__)
 default_encoding = 'utf-8'
@@ -166,16 +166,22 @@ def get_branches(gitenv) -> list:
     return [line.rstrip()[start:] for line in output]
 
 
+_retry_wait = 0.1
+
+
 def _cmd_retry(func):
     @functools.wraps(func)
     def retrier(*args, **kwargs):
-        wait = 1
-        for _ in range(5):
+        wait = _retry_wait
+        err = Exception()
+        for _ in range(3):
             try:
                 return func(*args, **kwargs)
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
+                err = e
                 time.sleep(random.random() * wait)
                 wait *= 2
+        raise err
     return retrier
 
 

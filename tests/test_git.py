@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import subprocess
+from unittest import mock
 
 import pytest
 
@@ -102,10 +103,11 @@ def test_git_save_branch_should_be_quiet(capfd, gitdir):
 
 def test_git_save_branch_should_raise_when_restore_fails(gitdir):
     subprocess.run(['git', 'branch', 'slave'])
-    with pytest.raises(subprocess.CalledProcessError):
-        with git.save_branch(gitdir):
-            subprocess.run(['git', 'checkout', 'slave'])
-            subprocess.run(['git', 'branch', '-d', 'master'])
+    with mock.patch.object(git, '_retry_wait', 0), \
+         pytest.raises(subprocess.CalledProcessError), \
+         git.save_branch(gitdir):
+        subprocess.run(['git', 'checkout', 'slave'])
+        subprocess.run(['git', 'branch', '-d', 'master'])
 
 
 def test_git_save_worktree(gitdir):
