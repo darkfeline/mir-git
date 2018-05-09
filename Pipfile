@@ -5,4 +5,4 @@ verify_ssl = true
 [dev-packages]
 pytest = "~=3.2"
 "pytest-cov" = "~=2.5"
-"twine" = "~=1.9"
+"twine" = "~=1.11"
